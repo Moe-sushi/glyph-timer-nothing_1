@@ -125,15 +125,20 @@ int main(int argc, char *argv[])
   // Disable all leds.
   for (int i = 0; i < enabled_leds; i++)
   {
-    sprintf(to_write, "%s%s%d", leds[i], " ", 0);
+    sprintf(to_write, "%s%s", leds[i], " 0");
     write(fd, to_write, sizeof(to_write));
   }
-  // Vibration.
+  // Vibration and blinking.
   for (int i = 0; i < 10; i++)
   {
     printf("\a");
     fflush(stdout);
-    usleep(500000);
+    usleep(200000);
+    sprintf(to_write, "%s%d", "16 ", MAX_BRIGHTNESS);
+    write(fd, to_write, sizeof(to_write));
+    usleep(200000);
+    sprintf(to_write, "%s", "16 0");
+    write(fd, to_write, sizeof(to_write));
   }
   close(fd);
   return 0;
