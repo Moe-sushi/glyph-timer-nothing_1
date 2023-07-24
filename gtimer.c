@@ -161,12 +161,19 @@ int main(int argc, char *argv[])
       {
         while (time_ratio - ratio_bk >= 10)
         {
-          write_single_led(fd, led_now, 0);
-          ratio_bk += 10;
-          led_now--;
-          enabled_leds--;
-          brightness = MAX_BRIGHTNESS;
-          write_leds(fd, enabled_leds, brightness);
+          if (enabled_leds > 0)
+          {
+            write_single_led(fd, led_now, 0);
+            ratio_bk += 10;
+            led_now--;
+            enabled_leds--;
+            brightness = MAX_BRIGHTNESS;
+            write_leds(fd, enabled_leds, brightness);
+          }
+          else
+          {
+            break;
+          }
         }
       }
       int j = 1;
