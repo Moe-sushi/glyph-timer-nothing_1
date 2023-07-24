@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
       {
         break;
       }
-      printf("\033[0G%02d H %02d M %02d S", hours, minutes, seconds);
+      printf("\033[0G\033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mH \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mM \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mS", hours, minutes, seconds);
       fflush(stdout);
       // Control leds.
       time_ratio = (past_seconds / total_seconds) * 100;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
       int j = 1;
       for (int i = 0; i < 9; i++)
       {
-        if ((time_ratio - ratio_bk) < j)
+        if ((time_ratio - ratio_bk) > j)
         {
           j++;
         }
@@ -180,17 +180,13 @@ int main(int argc, char *argv[])
         {
           brightness = MAX_BRIGHTNESS - (309 * i);
           write_single_led(fd, led_now, brightness);
-          if (led_now > 0)
-          {
-            write_single_led(fd, led_now - 1, brightness);
-          }
           break;
         }
       }
     }
   }
   // END of time.
-  printf("\n");
+  printf("\033[0m\n");
   // Disable all leds.
   write_leds(fd, 8, 0);
   // Vibration and blinking.
