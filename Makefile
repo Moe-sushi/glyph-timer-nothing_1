@@ -1,5 +1,8 @@
 all :
 	cc gtimer.c -o gtimer
+install :all
+	cp gtimer ${PREFIX}/bin/gtimer
+	chmod 777 ${PREFIX}/bin/gtimer
 clean :
 	rm gtimer
 format :
