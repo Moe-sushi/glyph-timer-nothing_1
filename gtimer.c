@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -103,12 +104,12 @@ int main(int argc, char *argv[])
   // Initialize leds.
   write_leds(fd, 8, MAX_BRIGHTNESS);
   // prepare to count down.
+  // To get the time.
   time_t time_old = 0;
   time(&time_old);
   time_t time_now = 0;
+  // Get total seconds.
   float total_seconds = seconds;
-  float past_seconds = 0;
-  float time_ratio = 0;
   if (minutes != 0)
   {
     total_seconds += minutes * 60;
@@ -119,6 +120,11 @@ int main(int argc, char *argv[])
   }
   // To check if time has changed.
   float time_bk = 0;
+  // For glyph.
+  float past_seconds = 0;
+  float time_ratio = 0;
+  // How many time has changed.
+  float ratio_bk = 0;
   // Timer clock.
   while (hours > 0 || minutes > 0 || seconds > 0)
   {
@@ -126,7 +132,7 @@ int main(int argc, char *argv[])
     past_seconds = time_now - time_old;
     if (time_bk != past_seconds)
     {
-      // Count down..
+      // Count down.
       time_bk = past_seconds;
       if (seconds > 0)
       {
@@ -147,13 +153,44 @@ int main(int argc, char *argv[])
       {
         break;
       }
-      printf("%02d H %02d M %02d S\n", hours, minutes, seconds);
+      printf("\033[0G%02d H %02d M %02d S", hours, minutes, seconds);
+      fflush(stdout);
       // Control leds.
-      time_ratio = (1 - (past_seconds / total_seconds)) * 100;
-      printf("%f", time_ratio);
+      time_ratio = (past_seconds / total_seconds) * 100;
+      if (enabled_leds > 0)
+      {
+        while (time_ratio - ratio_bk >= 10)
+        {
+          write_single_led(fd, led_now, 0);
+          ratio_bk += 10;
+          led_now--;
+          enabled_leds--;
+          brightness = MAX_BRIGHTNESS;
+          write_leds(fd, enabled_leds, brightness);
+        }
+      }
+      int j = 1;
+      for (int i = 0; i < 9; i++)
+      {
+        if ((time_ratio - ratio_bk) < j)
+        {
+          j++;
+        }
+        else
+        {
+          brightness = MAX_BRIGHTNESS - (309 * i);
+          write_single_led(fd, led_now, brightness);
+          if (led_now > 0)
+          {
+            write_single_led(fd, led_now - 1, brightness);
+          }
+          break;
+        }
+      }
     }
   }
   // END of time.
+  printf("\n");
   // Disable all leds.
   write_leds(fd, 8, 0);
   // Vibration and blinking.

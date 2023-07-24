@@ -1,3 +1,3 @@
-# glyph-timer-nothing_1
-Glyph timer for nothing phone 1 (WITHOUT GUI !!!)
-# !!! UNFINISHED
+# About:
+Written with C, just for fun.      
+It's not an app because I haven't learned Java.      
