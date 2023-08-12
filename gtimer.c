@@ -147,8 +147,6 @@ int main(int argc, char *argv[])
   {
     total_seconds += hours * 3600;
   }
-  // To check if time has changed.
-  float time_bk = 0;
   // For glyph.
   float past_seconds = 0;
   float time_ratio = 0;
@@ -159,67 +157,64 @@ int main(int argc, char *argv[])
   {
     time(&time_now);
     past_seconds = time_now - time_old;
-    if (time_bk != past_seconds)
+    // Count down.
+    if (seconds > 0)
     {
-      // Count down.
-      time_bk = past_seconds;
-      if (seconds > 0)
+      seconds--;
+    }
+    else if (minutes > 0)
+    {
+      minutes--;
+      seconds = 59;
+    }
+    else if (hours > 0)
+    {
+      hours--;
+      minutes = 59;
+      seconds = 59;
+    }
+    else
+    {
+      break;
+    }
+    printf("\033[0G\033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mH \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mM \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mS", hours, minutes, seconds);
+    fflush(stdout);
+    // Control leds.
+    time_ratio = (past_seconds / total_seconds) * 100;
+    if (enabled_leds > 0)
+    {
+      while (time_ratio - ratio_bk >= 10)
       {
-        seconds--;
-      }
-      else if (minutes > 0)
-      {
-        minutes--;
-        seconds = 59;
-      }
-      else if (hours > 0)
-      {
-        hours--;
-        minutes = 59;
-        seconds = 59;
-      }
-      else
-      {
-        break;
-      }
-      printf("\033[0G\033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mH \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mM \033[1;38;2;152;245;225m%02d \033[1;38;2;254;228;208mS", hours, minutes, seconds);
-      fflush(stdout);
-      // Control leds.
-      time_ratio = (past_seconds / total_seconds) * 100;
-      if (enabled_leds > 0)
-      {
-        while (time_ratio - ratio_bk >= 10)
+        if (enabled_leds > 0)
         {
-          if (enabled_leds > 0)
-          {
-            write_single_led(fd, led_now, 0);
-            ratio_bk += 10;
-            led_now--;
-            enabled_leds--;
-            brightness = MAX_BRIGHTNESS;
-            write_leds(fd, enabled_leds, brightness);
-          }
-          else
-          {
-            break;
-          }
-        }
-      }
-      int j = 1;
-      for (int i = 0; i < 9; i++)
-      {
-        if ((time_ratio - ratio_bk) > j)
-        {
-          j++;
+          write_single_led(fd, led_now, 0);
+          ratio_bk += 10;
+          led_now--;
+          enabled_leds--;
+          brightness = MAX_BRIGHTNESS;
+          write_leds(fd, enabled_leds, brightness);
         }
         else
         {
-          brightness = MAX_BRIGHTNESS - (309 * i);
-          write_single_led(fd, led_now, brightness);
           break;
         }
       }
     }
+    int j = 1;
+    for (int i = 0; i < 9; i++)
+    {
+      if ((time_ratio - ratio_bk) > j)
+      {
+        j++;
+      }
+      else
+      {
+        brightness = MAX_BRIGHTNESS - (309 * i);
+        write_single_led(fd, led_now, brightness);
+        break;
+      }
+    }
+    sleep(1);
   }
   // END of time.
   printf("\033[0m\n");
