@@ -40,16 +40,17 @@
 #include <unistd.h>
 #define MAX_BRIGHTNESS (4095 - 1000)
 #define SINGLE_LED_PATH "/sys/class/leds/aw210xx_led/single_led_br"
-// Leds to enable.
+// Leds to control.
+// Total 9 leds.
 char *leds[] = {"16", "13", "11", "9", "12", "10", "14", "15", "8"};
 // Enable leds.
-void write_leds(int fd, int enabled_leds, int brightness)
+void enable_leds(int fd, int enabled_leds)
 {
   char to_write[16] = {'\0'};
   for (int i = 0; i <= enabled_leds; i++)
   {
     // Enable leds to enable.
-    sprintf(to_write, "%s%s%d", leds[i], " ", brightness);
+    sprintf(to_write, "%s%s%d", leds[i], " ", MAX_BRIGHTNESS);
     write(fd, to_write, sizeof(to_write));
     // Disable other leds.
     if (i == enabled_leds)
@@ -62,7 +63,18 @@ void write_leds(int fd, int enabled_leds, int brightness)
     }
   }
 }
-// Enable single led.
+// Disable all leds.
+void disable_all_leds(int fd)
+{
+  char to_write[16] = {'\0'};
+  // Total 9 leds.
+  for (int i = 0; i <= 8; i++)
+  {
+    sprintf(to_write, "%s%s", leds[i], " 0");
+    write(fd, to_write, sizeof(to_write));
+  }
+}
+// Set single led brightness.
 void write_single_led(int fd, int led, int brightness)
 {
   char to_write[16] = {'\0'};
@@ -112,8 +124,6 @@ int main(int argc, char *argv[])
   int enabled_leds = 8;
   // To dim single led.
   int led_now = 8;
-  // To write to SINGLE_LED_PATH.
-  char to_write[16] = {'\0'};
   // To set led brightness.
   int brightness = MAX_BRIGHTNESS;
   // Check if we are running with root provilages.
@@ -131,7 +141,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   // Initialize leds.
-  write_leds(fd, 8, MAX_BRIGHTNESS);
+  enable_leds(fd, 8);
   // prepare to count down.
   // To get the time.
   time_t time_old = 0;
@@ -191,8 +201,7 @@ int main(int argc, char *argv[])
           ratio_bk += 10;
           led_now--;
           enabled_leds--;
-          brightness = MAX_BRIGHTNESS;
-          write_leds(fd, enabled_leds, brightness);
+          enable_leds(fd, enabled_leds);
         }
         else
         {
@@ -219,7 +228,7 @@ int main(int argc, char *argv[])
   // END of time.
   printf("\033[0m\n");
   // Disable all leds.
-  write_leds(fd, 8, 0);
+  disable_all_leds(fd);
   // Vibration and blinking.
   for (int i = 0; i < 10; i++)
   {
