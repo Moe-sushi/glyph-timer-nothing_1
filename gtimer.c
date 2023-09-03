@@ -38,6 +38,14 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+/*
+ * How to control the leds of glyph:
+ * just write "number"+" "+"brightness" to /sys/class/leds/aw210xx_led/single_led_br
+ * Try to run `echo "16 2048" > /sys/class/leds/aw210xx_led/single_led_br`
+ * And you will get to know how glyph works.
+ * Remember that brightness<=max_brightness which defines at /sys/class/leds/aw210xx_led/max_brightness
+ * (brightness<=4095)
+ */
 #define MAX_BRIGHTNESS (4095 - 1000)
 #define SINGLE_LED_PATH "/sys/class/leds/aw210xx_led/single_led_br"
 // Leds to control.
