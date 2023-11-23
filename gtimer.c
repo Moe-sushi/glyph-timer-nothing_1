@@ -91,6 +91,12 @@ void write_single_led(int fd, int led, int brightness)
 }
 int main(int argc, char *argv[])
 {
+  if (argc <= 1)
+  {
+    fprintf(stderr, "\033[31mInvalid argument\033[0m\n");
+    fprintf(stderr, "\033[31mUsage:\n  gtimer -h [hours] -m [minutes] -s [seconds]\033[0m\n");
+    exit(1);
+  }
   // Get the time to count down.
   int hours = 0, minutes = 0, seconds = 0;
   for (int i = 1; i < argc; i++)
@@ -201,12 +207,12 @@ int main(int argc, char *argv[])
     time_ratio = (past_seconds / total_seconds) * 100;
     if (enabled_leds > 0)
     {
-      while (time_ratio - ratio_bk >= 10)
+      while (time_ratio - ratio_bk >= 12)
       {
         if (enabled_leds > 0)
         {
           write_single_led(fd, led_now, 0);
-          ratio_bk += 10;
+          ratio_bk += 12;
           led_now--;
           enabled_leds--;
           enable_leds(fd, enabled_leds);

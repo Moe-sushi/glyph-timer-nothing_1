@@ -13,7 +13,7 @@ It's not an Android app because I haven't learned Java.
 # How to install:
 It runs in termux, install termux in your phone first, and then:      
 ```
-pkg in git make clang tsu
+pkg in git make clang tsu ndk-multilib-native-static
 git clone https://github.com/Moe-hacker/glyph-timer-nothing_1
 cd glyph-timer-nothing
 make install
